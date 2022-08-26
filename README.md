@@ -1,6 +1,6 @@
 
 
-# Pathways Dojo Infra Node Weather App Quick Starter
+# Pathways Dojo Infra Node Weather App
 
 This repository is used in conjunction with the Contino Infra Engineer to Cloud Engineer Pathway course delivered in Contini-U.
 
@@ -9,7 +9,7 @@ It includes and supports the following functionality:
 * Makefile providing basic Terraform deployment functionality
 * GitHub workflows for supporting basic Terraform deploy and destroy functionality
 * Terraform IaC for the test deployment of an s3 bucket
-* Node Weather App - https://github.com/phattp/nodejs-weather-app
+* Node Weather App - https://github.com/passivemodding/nodejs-weather-app
 
 <br> 
 
@@ -72,13 +72,13 @@ Note: Pushing to `master` branch will trigger Terraform (TF) deploy. You will al
 Additionally, ONLY changes to the following files and paths will trigger a workflow.
 
 ```
-    paths:
-      - 'docker-compose.yml'
-      - 'Makefile'
-      - '.github/workflows/**'
-      - '*dockerfile'
-      - 'modules/**'
-      - '**.tf'
+  paths:
+    - 'docker-compose.yml'
+    - 'Makefile'
+    - '.github/workflows/**'
+    - '*dockerfile'
+    - 'tf/modules/**'
+    - '**.tf'
 ```
 
 <br>

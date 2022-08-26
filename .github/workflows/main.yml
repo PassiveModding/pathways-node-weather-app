@@ -8,7 +8,7 @@ on:
       - 'Makefile'
       - '.github/workflows/**'
       - '*dockerfile'
-      - 'modules/**'
+      - 'tf/modules/**'
       - '**.tf'
 jobs:
   terraform_plan:
