@@ -44,3 +44,6 @@ destroy_apply:
 list_bucket: 
 	$(COMPOSE_RUN_AWS) s3 ls
 
+.PHONE: bash
+bash:
+	$(COMPOSE_RUN_BASH)
