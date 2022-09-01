@@ -2,7 +2,7 @@ resource "aws_lb" "this" {
   name               = "${var.app_name}-load-balancer"
   load_balancer_type = "application"
   # must be over 2 of the public subnets
-  subnets         = data.aws_subnets.public[*].id
+  subnets         = data.aws_subnets.public.ids
   security_groups = [aws_security_group.lb.id]
 
   internal                   = false

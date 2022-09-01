@@ -70,7 +70,7 @@ resource "aws_ecs_service" "this" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs.id]
-    subnets          = data.aws_subnets.private[*].id
+    subnets          = data.aws_subnets.private.ids
     assign_public_ip = false
   }
 
@@ -94,7 +94,7 @@ resource "aws_ecs_task_definition" "this" {
     [
       {
         name      = var.app_name,
-        image     = "${data.aws_ecr_repository.this.repository_url}:${var.app_image}",
+        image     = "${data.aws_ecr_repository.this.repository_url}:latest",
         essential = true,
         cpu       = 0,
         portMappings = [
