@@ -5,8 +5,18 @@ resource "aws_security_group" "lb" {
 
   ingress {
     protocol         = "tcp"
+    description      = "http"
     from_port        = 80
     to_port          = 80
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    protocol         = "tcp"
+    description      = "https"
+    from_port        = 443
+    to_port          = 443
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
@@ -17,6 +27,10 @@ resource "aws_security_group" "lb" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
+  }
+
+  lifecycle {
+    ignore_changes = [tags, tags_all]
   }
 }
 
@@ -27,8 +41,17 @@ resource "aws_security_group" "ecs" {
 
   ingress {
     protocol        = "tcp"
+    description     = "http"
     from_port       = 80
     to_port         = 80
+    security_groups = [aws_security_group.lb.id]
+  }
+
+  ingress {
+    protocol        = "tcp"
+    description     = "https"
+    from_port       = 443
+    to_port         = 443
     security_groups = [aws_security_group.lb.id]
   }
 
@@ -38,5 +61,9 @@ resource "aws_security_group" "ecs" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
+  }
+
+  lifecycle {
+    ignore_changes = [tags, tags_all]
   }
 }

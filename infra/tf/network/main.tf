@@ -18,6 +18,8 @@ module "vpc" {
   enable_nat_gateway     = true
   one_nat_gateway_per_az = true
   tags                   = var.additional_tags
+  enable_dns_support     = true
+  enable_dns_hostnames   = true
 }
 
 module "s3_bucket" {
@@ -42,7 +44,9 @@ data "aws_iam_policy_document" "set_gateway_endpoint_policy_document" {
     }
     resources = [
       "${module.s3_bucket.s3_bucket_arn}",
-      "${module.s3_bucket.s3_bucket_arn}/*"
+      "${module.s3_bucket.s3_bucket_arn}/*",
+      "arn:aws:s3:::prod-${data.aws_region.current.name}-starport-layer-bucket/*",
+      "arn:aws:s3:::prod-${data.aws_region.current.name}-starport-layer-bucket"
     ]
   }
 }

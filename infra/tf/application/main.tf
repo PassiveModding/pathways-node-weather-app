@@ -103,9 +103,20 @@ resource "aws_ecs_task_definition" "this" {
             containerPort = var.container_port,
             hostPoty      = var.container_port
           }
-        ]
+        ],
+        logConfigurations = {
+          logDriver = "awslogs",
+          options = {
+            awslogs-group  = "${aws_cloudwatch_log_group.this.name}",
+            awslogs-region = "${data.aws_ssm_parameter.vpc_region.value}"
+          }
+        }
       }
   ])
 
   tags = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "this" {
+  name = var.app_name
 }
