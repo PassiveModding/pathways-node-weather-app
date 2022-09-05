@@ -27,11 +27,11 @@ resource "aws_lb_listener" "this" {
 resource "aws_lb_target_group" "this" {
   name = "${var.app_name}-lb-target-group"
   # the port in the target group is the port on which all targets receive traffic
-  port        = var.container_port
+  port        = 80
   protocol    = "HTTP"
   vpc_id      = data.aws_ssm_parameter.vpc_id.value
   target_type = "ip"
-
+  /*
   health_check {
     healthy_threshold   = "3"
     interval            = "300"
@@ -41,7 +41,7 @@ resource "aws_lb_target_group" "this" {
     path                = "/"
     unhealthy_threshold = "2"
   }
-
+*/
   tags = var.tags
 }
 

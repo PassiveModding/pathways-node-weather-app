@@ -57,16 +57,11 @@ resource "aws_ecs_cluster" "this" {
 }
 
 resource "aws_ecs_service" "this" {
-  name                               = "${var.app_name}-ecs"
-  cluster                            = aws_ecs_cluster.this.id
-  task_definition                    = aws_ecs_task_definition.this.arn
-  desired_count                      = 2
-  deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
-  health_check_grace_period_seconds  = 60
-  scheduling_strategy                = "REPLICA"
-  launch_type                        = "FARGATE"
-  force_new_deployment               = true
+  name            = "${var.app_name}-ecs"
+  cluster         = aws_ecs_cluster.this.id
+  task_definition = aws_ecs_task_definition.this.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
 
   network_configuration {
     security_groups  = [aws_security_group.ecs.id]
@@ -76,7 +71,7 @@ resource "aws_ecs_service" "this" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.this.arn
-    container_name   = var.app_name
+    container_name   = "${var.app_name}-container"
     container_port   = var.container_port
   }
 
@@ -85,7 +80,7 @@ resource "aws_ecs_service" "this" {
 
 resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
-  family                   = var.app_name
+  family                   = "${var.app_name}-family"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.execution.arn
   cpu                      = 256
@@ -93,24 +88,16 @@ resource "aws_ecs_task_definition" "this" {
   container_definitions = jsonencode(
     [
       {
-        name      = var.app_name,
+        name      = "${var.app_name}-container",
         image     = "${data.aws_ecr_repository.this.repository_url}:latest",
         essential = true,
         cpu       = 0,
         portMappings = [
           {
             protocol      = "tcp",
-            containerPort = var.container_port,
-            hostPoty      = var.container_port
+            containerPort = "${var.container_port}"
           }
-        ],
-        logConfigurations = {
-          logDriver = "awslogs",
-          options = {
-            awslogs-group  = "${aws_cloudwatch_log_group.this.name}",
-            awslogs-region = "${data.aws_ssm_parameter.vpc_region.value}"
-          }
-        }
+        ]
       }
   ])
 
