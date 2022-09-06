@@ -30,7 +30,7 @@ resource "aws_lb_target_group" "this" {
   name_prefix = var.resource_name_prefix
   # the port in the target group is the port on which all targets receive traffic
   # NOTE: since the ecs service itself registers it's port, this is unused.
-  port        = 3000
+  port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = data.aws_ssm_parameter.vpc_id.value
   target_type = "ip"

@@ -39,6 +39,7 @@ resource "aws_security_group" "ecs" {
   name   = "${var.app_name}-ecs-sg"
   vpc_id = data.aws_ssm_parameter.vpc_id.value
 
+  /*
   ingress {
     protocol        = "tcp"
     description     = "http"
@@ -54,12 +55,13 @@ resource "aws_security_group" "ecs" {
     to_port         = 443
     security_groups = [aws_security_group.lb.id]
   }
+  */
 
   ingress {
     protocol        = "tcp"
     description     = "container"
-    from_port       = 3000
-    to_port         = 3000
+    from_port       = var.container_port
+    to_port         = var.container_port
     security_groups = [aws_security_group.lb.id]
   }
 

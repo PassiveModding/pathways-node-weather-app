@@ -7,7 +7,7 @@ variable "tags" {
   default = {}
 }
 
-variable "resource_name_prefix" {
+variable "ssm_resource_prefix" {
   type    = string
   default = "lj-pathways-dojo"
 }

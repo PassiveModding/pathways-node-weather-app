@@ -3,7 +3,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.14.2"
 
-  name           = var.resource_name_prefix
+  name           = var.ssm_resource_prefix
   cidr           = var.vpc_cidr
   public_subnets = var.vpc_public_subnets
   public_subnet_tags = {
@@ -17,7 +17,7 @@ module "vpc" {
   create_igw             = true
   enable_nat_gateway     = true
   one_nat_gateway_per_az = true
-  tags                   = var.additional_tags
+  tags                   = var.tags
   enable_dns_support     = true
   enable_dns_hostnames   = true
 }
@@ -32,7 +32,7 @@ module "s3_bucket" {
 # S3 Endpoint
 data "aws_iam_policy_document" "set_gateway_endpoint_policy_document" {
   statement {
-    sid = "${var.resource_name_prefix}-bucket-policy"
+    sid = "${var.ssm_resource_prefix}-bucket-policy"
     actions = [
       "s3:ListBucket",
       "s3:GetObject",
@@ -45,6 +45,8 @@ data "aws_iam_policy_document" "set_gateway_endpoint_policy_document" {
     resources = [
       "${module.s3_bucket.s3_bucket_arn}",
       "${module.s3_bucket.s3_bucket_arn}/*",
+      # starport layer access required to allow ecs to access the ecr repo
+      # consider: could this be moved to the app layer
       "arn:aws:s3:::prod-${data.aws_region.current.name}-starport-layer-bucket/*",
       "arn:aws:s3:::prod-${data.aws_region.current.name}-starport-layer-bucket"
     ]
@@ -53,7 +55,7 @@ data "aws_iam_policy_document" "set_gateway_endpoint_policy_document" {
 
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = module.vpc.vpc_id
-  service_name      = var.s3_gateway_endpoint
+  service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   policy            = data.aws_iam_policy_document.set_gateway_endpoint_policy_document.json
   vpc_endpoint_type = "Gateway"
   tags              = var.additional_tags
@@ -81,27 +83,27 @@ resource "aws_vpc_endpoint_route_table_association" "private_s3_association" {
 #########################
 data "aws_region" "current" {}
 resource "aws_ssm_parameter" "region" {
-  name  = "/${var.resource_name_prefix}/vpc/region"
+  name  = "/${var.ssm_resource_prefix}/vpc/region"
   type  = "String"
   value = data.aws_region.current.name
 }
 
 resource "aws_ssm_parameter" "vpc_id" {
-  name  = "/${var.resource_name_prefix}/vpc/id"
+  name  = "/${var.ssm_resource_prefix}/vpc/id"
   type  = "String"
   value = module.vpc.vpc_id
 }
 
 resource "aws_ssm_parameter" "public_subnet_ids" {
   count = length(module.vpc.public_subnets)
-  name  = "/${var.resource_name_prefix}/subnet/public/${count.index}/id"
+  name  = "/${var.ssm_resource_prefix}/subnet/public/${count.index}/id"
   type  = "String"
   value = module.vpc.public_subnets[count.index]
 }
 
 resource "aws_ssm_parameter" "private_subnet_ids" {
   count = length(module.vpc.private_subnets)
-  name  = "/${var.resource_name_prefix}/subnet/private/${count.index}/id"
+  name  = "/${var.ssm_resource_prefix}/subnet/private/${count.index}/id"
   type  = "String"
   value = module.vpc.private_subnets[count.index]
 }

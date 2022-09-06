@@ -1,9 +1,9 @@
-variable "resource_name_prefix" {
+variable "ssm_resource_prefix" {
   type    = string
   default = "lj-pathways-dojo"
 }
 
-variable "additional_tags" {
+variable "tags" {
   default = {}
 }
 
@@ -25,11 +25,6 @@ variable "vpc_private_subnets" {
 variable "availability_zones" {
   type    = list(string)
   default = ["ap-southeast-2a", "ap-southeast-2b", "ap-southeast-2c"]
-}
-
-variable "s3_gateway_endpoint" {
-  type    = string
-  default = "com.amazonaws.ap-southeast-2.s3"
 }
 
 variable "s3_bucket_name" {

@@ -16,7 +16,7 @@ output "ecr_repository_url" {
 }
 
 resource "aws_ssm_parameter" "ecr_repository_name" {
-  name  = "/${var.resource_name_prefix}/ecr/name"
+  name  = "/${var.ssm_resource_prefix}/ecr/name"
   type  = "String"
   value = aws_ecr_repository.this.name
 }
