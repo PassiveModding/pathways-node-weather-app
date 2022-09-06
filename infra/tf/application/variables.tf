@@ -17,7 +17,12 @@ variable "app_image" {
   default = "lj-weather-app"
 }
 
-variable "resource_name_prefix" {
+variable "ssm_resource_prefix" {
   type    = string
   default = "lj-pathways-dojo"
+}
+
+variable "resource_name_prefix" {
+  type    = string
+  default = "lj-app"
 }

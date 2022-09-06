@@ -1,9 +1,9 @@
 data "aws_ssm_parameter" "vpc_id" {
-  name = "/${var.resource_name_prefix}/vpc/id"
+  name = "/${var.ssm_resource_prefix}/vpc/id"
 }
 
 data "aws_ssm_parameter" "ecr_name" {
-  name = "/${var.resource_name_prefix}/ecr/name"
+  name = "/${var.ssm_resource_prefix}/ecr/name"
 }
 
 data "aws_ecr_repository" "this" {
@@ -105,5 +105,5 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
-  name = var.app_name
+  name_prefix = var.resource_name_prefix
 }
