@@ -14,6 +14,9 @@ $ make [command]
 - `run_[command] ENV=<layer>` - runs `make init` followed by the specified command
 - `console ENV=<layer>`
 - `list_bucket` - used to test s3 credentials, runs `aws s3 ls` to list buckets
+- `build` - used to build the docker image for the web app
+- `login_ecr` - logs in to ecr using docker
+- `push` - used to push the docker image of the web app to the currently logged in repository
 
 
 ### Layers:
@@ -36,7 +39,7 @@ It includes and supports the following functionality:
 * Makefile providing basic Terraform deployment functionality
 * GitHub workflows for supporting basic Terraform deploy and destroy functionality
 * Terraform IaC for the test deployment of an s3 bucket
-* Node Weather App - https://github.com/passivemodding/nodejs-weather-app
+* Node Weather App - https://github.com/phattp/nodejs-weather-app
 
 <br> 
 
