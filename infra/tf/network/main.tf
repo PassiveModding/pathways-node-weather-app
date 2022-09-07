@@ -25,7 +25,7 @@ module "vpc" {
 module "s3_bucket" {
   source = "./modules/s3"
   bucket = var.s3_bucket_name
-  tags   = var.additional_tags
+  tags   = var.tags
 }
 
 
@@ -58,7 +58,7 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.${data.aws_region.current.name}.s3"
   policy            = data.aws_iam_policy_document.set_gateway_endpoint_policy_document.json
   vpc_endpoint_type = "Gateway"
-  tags              = var.additional_tags
+  tags              = var.tags
 }
 
 resource "aws_vpc_endpoint_route_table_association" "public_s3_association" {
