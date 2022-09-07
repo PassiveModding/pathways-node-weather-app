@@ -10,9 +10,7 @@ on:
       - master
     paths:
       - 'app/*'
-      - '.github/workflows/**'
-      - 'infra/tf/registry/**'
-      - 'Makefile'
+      - '.github/workflows/docker.yml'
 
 jobs:
   build-and-push:  # job name
