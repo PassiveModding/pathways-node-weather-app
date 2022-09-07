@@ -19,7 +19,7 @@ run_destroy_plan: init destroy_plan
 run_destroy_apply: init destroy_apply
 
 .PHONY: init
-init: infra/.env
+init:
 	$(COMPOSE_RUN_TERRAFORM) init -input=false
 	-$(COMPOSE_RUN_TERRAFORM) validate
 	-$(COMPOSE_RUN_TERRAFORM) fmt
