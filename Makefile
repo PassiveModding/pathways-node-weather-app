@@ -1,15 +1,11 @@
-export ENV
-
-COMPOSE_RUN_TERRAFORM = docker-compose -f ./infra/docker-compose.yml -f ./infra/docker-compose.$(ENV).yml run --rm tf
 COMPOSE_RUN_BASH = docker-compose -f ./infra/docker-compose.yml -f ./infra/docker-compose.root.yml run --rm --entrypoint bash tf
-COMPOSE_RUN_AWS = docker-compose -f ./infra/docker-compose.yml -f ./infra/docker-compose.root.yml run --rm --entrypoint aws tf
 
-export AWS_ACCOUNT_ID
-export AWS_REGION 
-export AWS_ECR_REPO_NAME 
-IMAGE_NAME = $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(AWS_ECR_REPO_NAME):latest
+################################
+### TERRAFORM
+################################
+export ENV
+COMPOSE_RUN_TERRAFORM = docker-compose -f ./infra/docker-compose.yml -f ./infra/docker-compose.$(ENV).yml run --rm tf
 
-# TERRAFORM
 .PHONY: run_plan
 run_plan: init plan
 
@@ -23,7 +19,7 @@ run_destroy_plan: init destroy_plan
 run_destroy_apply: init destroy_apply
 
 .PHONY: init
-init:
+init: infra/.env
 	$(COMPOSE_RUN_TERRAFORM) init -input=false
 	-$(COMPOSE_RUN_TERRAFORM) validate
 	-$(COMPOSE_RUN_TERRAFORM) fmt
@@ -47,16 +43,17 @@ destroy_apply:
 .PHONY: console
 console:
 	$(COMPOSE_RUN_TERRAFORM) console
+################################
 
-# AWS
-.PHONY: list_bucket
-list_bucket: 
-	$(COMPOSE_RUN_AWS) s3 ls
+################################
+### DOCKER
+################################
+export AWS_ACCOUNT_ID
+export AWS_REGION 
+export AWS_ECR_REPO_NAME 
+IMAGE_NAME = $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/$(AWS_ECR_REPO_NAME):latest
+COMPOSE_RUN_AWS = docker-compose -f ./infra/docker-compose.yml -f ./infra/docker-compose.root.yml run --rm --entrypoint aws tf
 
-
-
-
-# DOCKER
 .PHONY: build
 build:
 	docker build -t $(IMAGE_NAME) -f ./app/Dockerfile ./app
@@ -69,3 +66,4 @@ push:
 login_ecr: 
 	$(COMPOSE_RUN_AWS) ecr get-login-password --region $(AWS_REGION) \
 	| docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+################################

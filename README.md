@@ -1,3 +1,10 @@
+## Github Workflows
+
+- ENVFILE variable scoping.
+
+The `docker-compose.yml` file uses variable substitution such that if `ENVFILE` is present in the shell, it will override the default.
+This is used because locally the `.env` file will be used in the `./infra` folder, however for github actions this file doesn't exist since it's never committed to the repo. Instead we override the `ENVFILE` variable to point it to the `env.template` file instead so the docker build doesn't fail.
+
 ## Using MAKE
 
 The commands for make allow specifying the environment (infra layer) to apply terraform commands to the specified layer.
