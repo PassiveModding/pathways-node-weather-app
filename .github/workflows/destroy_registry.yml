@@ -1,5 +1,10 @@
 name: Destroy Registry Infra
 on:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)    
+        required: false
   push:
     branches:
       - destroy
@@ -19,9 +24,16 @@ jobs:
       AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
       ENVFILE: ../env.template
     steps:
-    - uses: actions/checkout@v2
-    - name: Terraform_Destroy_Plan
-      run: make run_destroy_plan ENV=reg    
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      - name: Terraform_Destroy_Plan
+        run: make run_destroy_plan ENV=reg    
 
   terraform_destroy_apply_registry:
     environment:
@@ -34,6 +46,13 @@ jobs:
       AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
       ENVFILE: ../env.template
     steps:
-    - uses: actions/checkout@v2
-    - name: Terraform_Destroy_Apply
-      run: make run_destroy_apply ENV=reg 
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      - name: Terraform_Destroy_Apply
+        run: make run_destroy_apply ENV=reg 
