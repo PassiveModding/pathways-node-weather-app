@@ -1,57 +1,46 @@
 name: Build and Push to Amazon ECR
 on:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)    
+        required: false
   push:
     branches:
       - master
     paths:
       - 'app/*'
-      - '.github/workflows/**'
-      - 'infra/tf/registry/**'
-      - 'Makefile'
+      - '.github/workflows/docker.yml'
 
 jobs:
-#  docker-build-push:
-#    runs-on: ubuntu-latest
-#    env:
-#      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-#      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-#      AWS_REGION: ${{ secrets.AWS_REGION }}
-#      AWS_ECR_REPO_NAME: ${{ secrets.AWS_ECR_REPO_NAME }}
-#      ENVFILE: ../env.template
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Login ECR
-#        run: make login_ecr
-#      - name: Build Docker
-#        run: make build
-#      - name: Push Docker
-#        run: make push
-
   build-and-push:  # job name
     runs-on: ubuntu-latest
     steps:
-    - name: checkout code
-      uses: actions/checkout@v2
+      - name: Clone Repository (Latest)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref == ''
+      - name: Clone Repository (Custom Ref)
+        uses: actions/checkout@v2
+        if: github.event.inputs.git-ref != ''
+        with:
+          ref: ${{ github.event.inputs.git-ref }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Build, tag, and push image to Amazon ECR
-      working-directory: ./app
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      - name: Build, tag, and push image to Amazon ECR
+        working-directory: ./app
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPO_NAME }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
