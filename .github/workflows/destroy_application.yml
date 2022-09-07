@@ -22,7 +22,7 @@ jobs:
     - name: Terraform_Destroy_Plan
       run: make run_destroy_plan ENV=app    
 
-  terraform_destroy_apply_application
+  terraform_destroy_apply_application:
     environment:
       name: approval
     needs: terraform_destroy_plan_application
