@@ -53,9 +53,7 @@ console:
 list_bucket: 
 	$(COMPOSE_RUN_AWS) s3 ls
 
-export AWS_REGION
-export AWS_ACCOUNT_ID
-export AWS_REPO_NAME
+
 
 
 # DOCKER
