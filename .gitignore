@@ -50,3 +50,9 @@ node_modules/
 
 # Optional npm cache directory
 .npm
+
+# VSCode environment
+.vscode/
+
+# ENV
+.env

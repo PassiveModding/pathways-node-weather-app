@@ -1,27 +1,26 @@
-### Define Variables
-variable "bucket" {
-  default     = ""
-}
-
-variable "tags" {
-  default     = {}
-}
-
-### Create Resources
+#########################
+## Create resources
+#########################
 resource "aws_s3_bucket" "this" {
   bucket = var.bucket
-  acl    = "private"
-
   tags   = var.tags
 }
 
-### Define Output
+resource "aws_s3_bucket_acl" "this" {
+  bucket = aws_s3_bucket.this.id
+  acl    = "private"
+}
+
+#########################
+## Outputs
+#########################
+
 output "s3_bucket_name" {
   description = "The name of the bucket"
   value       = aws_s3_bucket.this.id
 }
 
-output "s3_bucket_name_arn" {
+output "s3_bucket_arn" {
   description = "The name of the bucket"
   value       = aws_s3_bucket.this.arn
 }

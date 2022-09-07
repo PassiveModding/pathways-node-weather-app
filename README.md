@@ -1,6 +1,43 @@
+## Github Workflows
+
+- ENVFILE variable scoping.
+
+The `docker-compose.yml` file uses variable substitution such that if `ENVFILE` is present in the shell, it will override the default.
+This is used because locally the `.env` file will be used in the `./infra` folder, however for github actions this file doesn't exist since it's never committed to the repo. Instead we override the `ENVFILE` variable to point it to the `env.template` file instead so the docker build doesn't fail.
+
+## Using MAKE
+
+The commands for make allow specifying the environment (infra layer) to apply terraform commands to the specified layer.
+
+```sh
+$ make [command]
+```
+### Commands:
+- `init ENV=<layer>` - runs `terraform init`, `validate` and `format` on the target layer
+- `plan ENV=<layer>` - runs `terraform plan` on the target layer
+- `apply ENV=<layer>` - runs `terraform apply` on the target layer
+- `destroy_plan ENV=<layer>` - runs `terraform plan -destroy` on the target layer
+- `destroy_apply ENV=<layer>` - runs `terraform destroy -auto-approve` on the target layer
+- `run_[command] ENV=<layer>` - runs `make init` followed by the specified command
+- `console ENV=<layer>`
+- `list_bucket` - used to test s3 credentials, runs `aws s3 ls` to list buckets
+- `build` - used to build the docker image for the web app
+- `login_ecr` - logs in to ecr using docker
+- `push` - used to push the docker image of the web app to the currently logged in repository
 
 
-# Pathways Dojo Infra Node Weather App Quick Starter
+### Layers:
+- `reg` - aws ecr for pushing image builds to
+- `vpc` - the network layer
+- `app` - ecs for container orchestration, balancing and scaling
+
+### Example:
+```sh
+$ make run_plan ENV=vpc
+```
+
+
+# Pathways Dojo Infra Node Weather App
 
 This repository is used in conjunction with the Contino Infra Engineer to Cloud Engineer Pathway course delivered in Contini-U.
 
@@ -72,13 +109,13 @@ Note: Pushing to `master` branch will trigger Terraform (TF) deploy. You will al
 Additionally, ONLY changes to the following files and paths will trigger a workflow.
 
 ```
-    paths:
-      - 'docker-compose.yml'
-      - 'Makefile'
-      - '.github/workflows/**'
-      - '*dockerfile'
-      - 'modules/**'
-      - '**.tf'
+  paths:
+    - 'docker-compose.yml'
+    - 'Makefile'
+    - '.github/workflows/**'
+    - '*dockerfile'
+    - 'tf/modules/**'
+    - '**.tf'
 ```
 
 <br>

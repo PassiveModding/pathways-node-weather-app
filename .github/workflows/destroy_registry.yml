@@ -1,0 +1,39 @@
+name: Destroy Registry Infra
+on:
+  push:
+    branches:
+      - destroy
+    paths:
+      - '.github/workflows/registry.yml'
+      - 'infra/tf/dockerfile'
+      - 'infra/tf/registry/**'
+      - 'infra/docker-compose.yml'
+      - 'infra/docker-compose.reg.yml'
+      - 'Makefile'
+jobs:
+  terraform_destroy_plan_registry:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
+      ENVFILE: ../env.template
+    steps:
+    - uses: actions/checkout@v2
+    - name: Terraform_Destroy_Plan
+      run: make run_destroy_plan ENV=reg    
+
+  terraform_destroy_apply_registry:
+    environment:
+      name: approval
+    needs: terraform_destroy_plan_registry
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_SESSION_TOKEN:  ${{ secrets.AWS_SESSION_TOKEN }} 
+      ENVFILE: ../env.template
+    steps:
+    - uses: actions/checkout@v2
+    - name: Terraform_Destroy_Apply
+      run: make run_destroy_apply ENV=reg 

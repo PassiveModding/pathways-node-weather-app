@@ -1,5 +1,5 @@
 FROM hashicorp/terraform:1.0.1 as tf
-MAINTAINER "Contino APAC <delivery.au@contino.io>"
+LABEL maintainer="Contino APAC <delivery.au@contino.io>"
 
 RUN apk add --update --no-cache \
         make \
@@ -13,7 +13,6 @@ RUN apk add --update --no-cache \
         google-api-python-client \
         google-auth \
         awscli
-
 
 # set default home directory for root.
 ENV HOME /home/terraform
