@@ -26,3 +26,8 @@ variable "resource_name_prefix" {
   type    = string
   default = "lj-app"
 }
+
+variable "route53_base_domain" {
+  type    = string
+  default = "weatherapp.click"
+}
