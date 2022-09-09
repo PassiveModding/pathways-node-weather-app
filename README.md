@@ -2,7 +2,7 @@
 
 - Separate network and application layers
 - Auto Scaling on AWS Fargate for weather app
-- Automated build and push to ecs on commit
+- Automated build and push to ecs on commit with manual approval for deployment of the weather app to ecs
 - Automated Terraform Plan with manual approval for apply on commit
 - Easy destroy pattern by pulling to the `destroy` branch
 - SSL Security with automated DNS challenge validation on the configured domain
