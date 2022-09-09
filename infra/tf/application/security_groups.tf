@@ -1,16 +1,7 @@
-# allow http/https requests but nothing else
+# allow https requests but nothing else
 resource "aws_security_group" "lb" {
   name   = "${var.app_name}-alb-sg"
   vpc_id = data.aws_ssm_parameter.vpc_id.value
-
-  ingress {
-    protocol         = "tcp"
-    description      = "http"
-    from_port        = 80
-    to_port          = 80
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
 
   ingress {
     protocol         = "tcp"
@@ -38,24 +29,6 @@ resource "aws_security_group" "lb" {
 resource "aws_security_group" "ecs" {
   name   = "${var.app_name}-ecs-sg"
   vpc_id = data.aws_ssm_parameter.vpc_id.value
-
-  /*
-  ingress {
-    protocol        = "tcp"
-    description     = "http"
-    from_port       = 80
-    to_port         = 80
-    security_groups = [aws_security_group.lb.id]
-  }
-
-  ingress {
-    protocol        = "tcp"
-    description     = "https"
-    from_port       = 443
-    to_port         = 443
-    security_groups = [aws_security_group.lb.id]
-  }
-  */
 
   ingress {
     protocol        = "tcp"
