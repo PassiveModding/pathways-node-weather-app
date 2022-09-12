@@ -1,10 +1,8 @@
 resource "aws_lb" "this" {
-  name_prefix        = var.resource_name_prefix
-  load_balancer_type = "application"
-  # must be over 2 of the public subnets
-  subnets         = data.aws_subnets.public.ids
-  security_groups = [aws_security_group.lb.id]
-
+  name_prefix                = var.resource_name_prefix
+  load_balancer_type         = "application"
+  subnets                    = var.lb_subnets
+  security_groups            = [aws_security_group.lb.id]
   internal                   = false
   enable_deletion_protection = false
 
@@ -23,7 +21,8 @@ resource "aws_lb_listener" "https" {
 
   tags = var.tags
 
-  certificate_arn = aws_acm_certificate_validation.this.certificate_arn
+  # make use of the cert to encrypt https traffic
+  certificate_arn = var.aws_acm_certificate_validation_arn
 }
 
 resource "aws_lb_listener" "http" {
@@ -48,11 +47,9 @@ resource "aws_lb_target_group" "this" {
   # name prefix is used because when applying changes to the target group, it often errors since ecs is still using it,
   # in combination with create_before_destroy, this allows it to be switched out without running into the issue since ecs will switch to the new one before destroy
   name_prefix = var.resource_name_prefix
-  # the port in the target group is the port on which all targets receive traffic
-  # NOTE: since the ecs service itself registers it's port, this is unused.
-  port        = var.container_port
   protocol    = "HTTP"
-  vpc_id      = data.aws_ssm_parameter.vpc_id.value
+  port        = var.default_port
+  vpc_id      = var.vpc_id
   target_type = "ip"
 
   health_check {
@@ -72,10 +69,3 @@ resource "aws_lb_target_group" "this" {
   }
 }
 
-output "aws_lb_target_group_arn" {
-  value = aws_lb_target_group.this.arn
-}
-
-output "aws_lb_url" {
-  value = aws_lb.this.dns_name
-}

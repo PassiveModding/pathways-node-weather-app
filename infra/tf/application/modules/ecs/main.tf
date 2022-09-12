@@ -1,11 +1,11 @@
 resource "aws_ecs_cluster" "this" {
-  name = "${var.app_name}-cluster"
+  name = "${var.resource_name_prefix}-cluster"
 
   tags = var.tags
 }
 
 resource "aws_ecs_service" "this" {
-  name            = "${var.app_name}-ecs"
+  name            = "${var.resource_name_prefix}-ecs"
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = 1
@@ -13,22 +13,26 @@ resource "aws_ecs_service" "this" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs.id]
-    subnets          = data.aws_subnets.private.ids
+    subnets          = var.ecs_subnets
     assign_public_ip = false
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.this.arn
-    container_name   = "${var.app_name}-container"
+    target_group_arn = var.lb_target_group_arn
+    container_name   = "${var.resource_name_prefix}-container"
     container_port   = var.container_port
   }
 
   tags = var.tags
 }
 
+data "aws_ecr_repository" "this" {
+  name = var.ecr_name
+}
+
 resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
-  family                   = "${var.app_name}-family"
+  family                   = "${var.resource_name_prefix}-family"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.execution.arn
   cpu                      = 256
@@ -36,7 +40,7 @@ resource "aws_ecs_task_definition" "this" {
   container_definitions = jsonencode(
     [
       {
-        name      = "${var.app_name}-container",
+        name      = "${var.resource_name_prefix}-container",
         image     = "${data.aws_ecr_repository.this.repository_url}:latest",
         essential = true,
         cpu       = 0,
@@ -45,9 +49,21 @@ resource "aws_ecs_task_definition" "this" {
             protocol      = "tcp",
             containerPort = "${var.container_port}"
           }
-        ]
+        ],
+        logConfiguration = {
+          logDriver = "awslogs",
+          options = {
+            awslogs-group         = "${aws_cloudwatch_log_group.this.name}",
+            awslogs-region        = "${var.region}",
+            awslogs-stream-prefix = "${var.resource_name_prefix}"
+          }
+        }
       }
   ])
 
   tags = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "this" {
+  name_prefix = var.resource_name_prefix
 }
