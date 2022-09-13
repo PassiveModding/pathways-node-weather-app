@@ -49,21 +49,9 @@ resource "aws_ecs_task_definition" "this" {
             protocol      = "tcp",
             containerPort = "${var.container_port}"
           }
-        ],
-        logConfiguration = {
-          logDriver = "awslogs",
-          options = {
-            awslogs-group         = "${aws_cloudwatch_log_group.this.name}",
-            awslogs-region        = "${var.region}",
-            awslogs-stream-prefix = "${var.resource_name_prefix}"
-          }
-        }
+        ]
       }
   ])
 
   tags = var.tags
-}
-
-resource "aws_cloudwatch_log_group" "this" {
-  name_prefix = var.resource_name_prefix
 }
