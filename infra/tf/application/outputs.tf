@@ -12,8 +12,3 @@ output "aws_dns_record" {
   value       = aws_route53_record.this.fqdn
   description = "the domain name which the desployed application should be accessible via"
 }
-
-output "cw_group" {
-  value       = module.ecs.cw_group
-  description = "the name of the cloudwatch group which container logs should be sent to"
-}
