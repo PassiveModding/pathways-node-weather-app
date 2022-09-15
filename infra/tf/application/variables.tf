@@ -12,13 +12,18 @@ variable "tags" {
 
 # assumes the existence of the following ssm parameters:
 # /${var.ssm_resource_prefix}/vpc/id
-# /${var.ssm_resource_prefix}/ecr/name
+# /${var.ssm_resource_prefix}/vpc/region
 variable "ssm_resource_prefix" {
   type        = string
   default     = "lj-pathways-dojo"
   description = "first path structure section for ssm resources"
 }
 
+variable "ecr_name" {
+  type        = string
+  default     = "lj-weather-app"
+  description = "name of the repo to pull images from"
+}
 
 variable "resource_name_prefix" {
   type        = string

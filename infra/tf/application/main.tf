@@ -2,10 +2,6 @@ data "aws_ssm_parameter" "vpc_id" {
   name = "/${var.ssm_resource_prefix}/vpc/id"
 }
 
-data "aws_ssm_parameter" "ecr_name" {
-  name = "/${var.ssm_resource_prefix}/ecr/name"
-}
-
 data "aws_ssm_parameter" "region" {
   name = "/${var.ssm_resource_prefix}/vpc/region"
 }
@@ -62,7 +58,7 @@ module "ecs" {
   source                      = "./modules/ecs"
   lb_target_group_arn         = module.lb.target_group_arn
   resource_name_prefix        = var.resource_name_prefix
-  ecr_name                    = data.aws_ssm_parameter.ecr_name.value
+  ecr_name                    = var.ecr_name
   tags                        = var.tags
   container_port              = var.container_port
   ecs_ingress_security_groups = [module.lb.lb_security_group_id]
