@@ -73,37 +73,4 @@ resource "aws_vpc_endpoint_route_table_association" "private_s3_association" {
   route_table_id  = module.vpc.private_route_table_ids[count.index]
 }
 
-
-#########################
-## Outputs
-#########################
-
-#########################
-## SSM Parameter outputs
-#########################
 data "aws_region" "current" {}
-resource "aws_ssm_parameter" "region" {
-  name  = "/${var.ssm_resource_prefix}/vpc/region"
-  type  = "String"
-  value = data.aws_region.current.name
-}
-
-resource "aws_ssm_parameter" "vpc_id" {
-  name  = "/${var.ssm_resource_prefix}/vpc/id"
-  type  = "String"
-  value = module.vpc.vpc_id
-}
-
-resource "aws_ssm_parameter" "public_subnet_ids" {
-  count = length(module.vpc.public_subnets)
-  name  = "/${var.ssm_resource_prefix}/subnet/public/${count.index}/id"
-  type  = "String"
-  value = module.vpc.public_subnets[count.index]
-}
-
-resource "aws_ssm_parameter" "private_subnet_ids" {
-  count = length(module.vpc.private_subnets)
-  name  = "/${var.ssm_resource_prefix}/subnet/private/${count.index}/id"
-  type  = "String"
-  value = module.vpc.private_subnets[count.index]
-}

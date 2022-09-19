@@ -3,8 +3,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   max-width: 650px;
   margin: 0 auto;
-  padding: 0 16px;
-
+  padding: 0 16px;  
+  background-image: url("https://cdn.sanity.io/images/hgftikht/production/b3f9bbb0ad773a309fa20c6ab05ad2837823bdd5-1200x627.jpg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  
   display: flex;
   flex-direction: column;
   min-height: 100vh;

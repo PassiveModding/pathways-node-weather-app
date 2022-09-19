@@ -2,14 +2,9 @@ data "aws_ssm_parameter" "vpc_id" {
   name = "/${var.ssm_resource_prefix}/vpc/id"
 }
 
-data "aws_ssm_parameter" "ecr_name" {
-  name = "/${var.ssm_resource_prefix}/ecr/name"
+data "aws_ssm_parameter" "region" {
+  name = "/${var.ssm_resource_prefix}/vpc/region"
 }
-
-data "aws_ecr_repository" "this" {
-  name = data.aws_ssm_parameter.ecr_name.value
-}
-
 # select public and private subnets randomly but make sure both public and private are paired in the same az
 data "aws_availability_zones" "this" {}
 
@@ -50,60 +45,36 @@ data "aws_subnets" "private" {
   }
 }
 
-resource "aws_ecs_cluster" "this" {
-  name = "${var.app_name}-cluster"
-
-  tags = var.tags
+#############
+# Modules
+#############
+module "dns" {
+  source              = "./modules/dns"
+  route53_domain_base = var.route53_domain_base
+  route53_domain_name = var.route53_domain_name
 }
 
-resource "aws_ecs_service" "this" {
-  name            = "${var.app_name}-ecs"
-  cluster         = aws_ecs_cluster.this.id
-  task_definition = aws_ecs_task_definition.this.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    security_groups  = [aws_security_group.ecs.id]
-    subnets          = data.aws_subnets.private.ids
-    assign_public_ip = false
-  }
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.this.arn
-    container_name   = "${var.app_name}-container"
-    container_port   = var.container_port
-  }
-
-  tags = var.tags
+module "ecs" {
+  source                      = "./modules/ecs"
+  lb_target_group_arn         = module.lb.target_group_arn
+  resource_name_prefix        = var.resource_name_prefix
+  ecr_name                    = var.ecr_name
+  tags                        = var.tags
+  container_port              = var.container_port
+  ecs_ingress_security_groups = [module.lb.lb_security_group_id]
+  vpc_id                      = data.aws_ssm_parameter.vpc_id.value
+  ecs_subnets                 = data.aws_subnets.private.ids
+  region                      = data.aws_ssm_parameter.region.value
 }
 
-resource "aws_ecs_task_definition" "this" {
-  network_mode             = "awsvpc"
-  family                   = "${var.app_name}-family"
-  requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.execution.arn
-  cpu                      = 256
-  memory                   = 512
-  container_definitions = jsonencode(
-    [
-      {
-        name      = "${var.app_name}-container",
-        image     = "${data.aws_ecr_repository.this.repository_url}:latest",
-        essential = true,
-        cpu       = 0,
-        portMappings = [
-          {
-            protocol      = "tcp",
-            containerPort = "${var.container_port}"
-          }
-        ]
-      }
-  ])
-
-  tags = var.tags
+module "lb" {
+  source                             = "./modules/lb"
+  vpc_id                             = data.aws_ssm_parameter.vpc_id.value
+  aws_acm_certificate_validation_arn = module.dns.validation_certificate_arn
+  lb_subnets                         = data.aws_subnets.public.ids
+  resource_name_prefix               = var.resource_name_prefix
+  tags                               = var.tags
+  default_port                       = var.container_port
 }
 
-resource "aws_cloudwatch_log_group" "this" {
-  name_prefix = var.resource_name_prefix
-}
+#######

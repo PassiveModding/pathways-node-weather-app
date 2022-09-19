@@ -1,5 +1,5 @@
 resource "aws_iam_role" "execution" {
-  name = "${var.app_name}-EcsExecutionRole"
+  name = "${var.resource_name_prefix}-EcsExecutionRole"
 
   assume_role_policy = <<EOF
 {
@@ -21,7 +21,7 @@ EOF
 }
 
 resource "aws_iam_policy" "execution" {
-  name = "${var.app_name}-EcsEcrAccess"
+  name = "${var.resource_name_prefix}-EcsEcrAccess"
 
   policy = <<EOF
 {
@@ -36,6 +36,17 @@ resource "aws_iam_policy" "execution" {
                 "ecr:GetAuthorizationToken"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "EnableCreationAndManagementOfCloudwatchLogGroupsAndStreams",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams"
+            ],
+            "Resource": "${aws_cloudwatch_log_group.this.arn}:*"
         }
     ]
 }
